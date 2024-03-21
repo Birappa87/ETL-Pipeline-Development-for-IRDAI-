@@ -14,7 +14,7 @@ git clone https://github.com/Birappa87/amfi.git
 
 ### 2. Installing dependency
 ```bash
-python manage.py venv venv #for creating virtual environment
+python -m venv venv #for creating virtual environment
 # activate the virtual environment
 
 ```bash
