@@ -2,25 +2,29 @@ from selectolax.parser import HTMLParser
 import requests
 import pandas as pd
 import time
-
+from datetime import datetime
 from database import MySQLConnector
       
         
-def load_data(data, filename):
+def load_data(data):
     """Save data into database
     Args:
         data (_type_): html content
         filename
     """
+    print("loading data")
     table_data = pd.read_html(data)[0]
     df = pd.DataFrame(table_data)
+    df.columns = ['sr', 'arn', 'holder_name', 'address', 'pin','email', 'city', 'telephone_r', 'telephone_o','arn_valid_till', 'arn_valid_from', 'kyd_compliant', 'EUIN']
+    df.drop('sr', axis=1, inplace=True)
+    df['IngestionTimeStamp'] = datetime.now()
     if len(df) != 0:
-        # df.to_csv(filename, index = False)
+
         connector = MySQLConnector(
-            host='localhost', 
-            database='database',
-            user='user',
-            password='test'
+            host=os.environ.get('host'), 
+            database=os.environ.get('database'),
+            user=os.environ.get('user'),
+            password=os.environ.get('password')
             )
         connector.connect()
         connector.insert_dataframe(df,'amfi')
@@ -35,6 +39,7 @@ def extract_city(content):
     Yields:
         _type_: city names
     """
+    print("Extracting city names")
     html = HTMLParser(content.text)
     options = html.css("select#ddlCity > option")
     for option in options[2:]:
@@ -62,9 +67,14 @@ def main(main_url= "https://www.amfiindia.com/investor-corner/online-center/loca
     
     script_begin = time.time()
 
-    session = requests.session()
-    data = session.get(main_url)
+    data = requests.get(main_url)
     city_count = 0
-    
-    session.close()
+    for city_name in extract_city(data):
+        data = amfi_post_request(city_name)
+        load_data(data)
+
     print("Total Time Taken by Script: {} Seconds for: {} cities".format(int(time.time() - script_begin),city_count))
+
+
+if __name__ == "__main__":
+    main()
