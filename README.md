@@ -7,6 +7,8 @@ To execute the scripts in this repository, follow these steps:
 ### 1. Clone the Repository
 Clone this repository to your local machine using the following command:
 
+### Add credentials of database in environment variable
+
 ```bash
 git clone https://github.com/Birappa87/amfi.git
 
