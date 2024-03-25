@@ -18,7 +18,7 @@ python3 manage.py venv venv #for creating virtual environment
 # activate the virtual environment
 
 ```bash
-pip install -r requiremenst.txt
+python setup.py install
 
 ### 3. Run the script
 ```bash

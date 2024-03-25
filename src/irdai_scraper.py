@@ -2,11 +2,12 @@ from playwright.sync_api import sync_playwright
 import time
 from selectolax.parser import HTMLParser
 import pandas as pd
-from database import MySQLConnector
 from datetime import datetime
 import xmltodict
 import requests
 from collections import defaultdict
+
+from src.database import MySQLConnector
 
 columns = ['bntagentid', 'agentname', 'licenceno', 'irdaurn', 'agentid', 'insurancetype', 'insurer', 'dpid', 'state',   'district', 'pincode', 'validfrom', 'validto', 'absorbedagent', 'phoneno', 'mobile_no']
 

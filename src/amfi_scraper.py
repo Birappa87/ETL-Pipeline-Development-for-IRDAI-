@@ -3,7 +3,8 @@ import requests
 import pandas as pd
 import time
 from datetime import datetime
-from database import MySQLConnector
+
+from src.database import MySQLConnector
 
 host="194.163.128.158"
 user="amfi_user"
