@@ -22,4 +22,4 @@ python setup.py install
 
 ### 3. Run the script
 ```bash
-python main.py
+amfi_irdai_bot_runner
