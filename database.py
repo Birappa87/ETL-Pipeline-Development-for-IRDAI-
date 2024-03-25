@@ -1,34 +1,72 @@
 import pandas as pd
-from sqlalchemy import create_engine
+import mysql.connector
+from datetime import datetime
 
 class MySQLConnector:
     def __init__(self, host, database, user, password):
+        """
+        Initializes a passionate connection to the MySQL database, eager to bridge data and dreams!
+        """
         self.host = host
         self.database = database
-        self.user = user
+        self.user = user 
         self.password = password
-        self.engine = None
+        self.connection = None  # Awaiting the spark of connection
 
     def connect(self):
+        """
+        Ignites a connection to the MySQL database, fueled by anticipation and excitement!
+        """
         try:
-            # Create SQLAlchemy engine
-            self.engine = create_engine(f"mysql+mysqlconnector://{self.user}:{self.password}@{self.host}/{self.database}")
-            print("Connected to MySQL database")
-        except Exception as e:
-            print("Error connecting to MySQL database:", e)
+            self.connection = mysql.connector.connect(
+                host=self.host,
+                database=self.database,
+                user=self.user,
+                password=self.password
+            )
+            print("Connected to MySQL database! Data awaits its destiny.")
+        except mysql.connector.Error as e:
+            print(f"Error connecting to MySQL database: {e}")  # Handle setbacks with grace
 
-    def insert_dataframe(self, dataframe, table_name):
+    def insert_or_update_dataframe(self, dataframe, table_name, primary_key_column):
         try:
-            # Insert DataFrame into MySQL table
-            dataframe.fillna(0, inplace=True)
-            dataframe.to_sql(table_name, self.engine, if_exists='replace', index=False)
-            print("Data inserted successfully into MySQL table:", table_name)
-        except Exception as e:
-            print("Error inserting data into MySQL table:", e)
+            cursor = self.connection.cursor()
+            dataframe.fillna('0', inplace=True)
+            select_query = f"SELECT * FROM {table_name}"
+            cursor.execute(select_query)
+            existing_data = cursor.fetchall()
+            existing_df = pd.DataFrame(existing_data, columns=dataframe.columns)
+
+            # Subtract exact matches from the original DataFrame
+            dataframe = dataframe.merge(existing_df, how='left', indicator=True).query('_merge == "left_only"').drop('_merge', axis=1)
+
+            cols = tuple([col for col in dataframe.columns])
+            for index, row in dataframe.iterrows():
+                values = [row[col] for col in cols]
+
+                # check if this record exists in database if exists overwrite
+                selectexpr = f"SELECT * FROM {table_name} WHERE {primary_key_column} = '{dataframe[primary_key_column].values[index]}'"
+                exists = cursor.execute(selectexpr)
+                result = cursor.fetchone()
+                if result is not None:
+                    # update the values
+                    set_clause = ", ".join([f"{col}='{row[col]}'" for col in dataframe.columns])
+                    query = f"UPDATE {table_name} SET {set_clause} WHERE {primary_key_column} = '{dataframe[primary_key_column].values[index]}'"
+                else:
+                    # Construct the insert query
+                    query = f"INSERT INTO {table_name} ({', '.join(cols)}) VALUES {tuple(values)}"
+                cursor.execute(query)
+                self.connection.commit()
+            print(f"Data loaded Successfully {table_name}")
+        except mysql.connector.Error as e:
+            print(f"Error inserting or updating data: {e}")
 
     def disconnect(self):
+        """
+        Releases the connection with tenderness, bidding farewell until our paths cross again.
+        """
         try:
-            # No need to explicitly close the engine with SQLAlchemy
-            print("MySQL connection is closed")
-        except Exception as e:
-            print("Error disconnecting from MySQL database:", e)
+            self.connection.close()
+            print("MySQL connection gracefully released. Until we meet again, dear data.")
+        except mysql.connector.Error as e:
+            print(f"Error disconnecting from MySQL database: {e}")  # Handle parting pangs with composure

@@ -14,12 +14,12 @@ git clone https://github.com/Birappa87/amfi.git
 
 ### 2. Installing dependency
 ```bash
-python manage.py venv venv #for creating virtual environment
+python3 manage.py venv venv #for creating virtual environment
 # activate the virtual environment
 
 ```bash
-pip install requiremenst.txt
+pip install -r requiremenst.txt
 
 ### 3. Run the script
 ```bash
-python amfi_scraper.py
+python main.py

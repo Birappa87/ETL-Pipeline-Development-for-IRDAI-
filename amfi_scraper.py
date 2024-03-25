@@ -4,7 +4,12 @@ import pandas as pd
 import time
 from datetime import datetime
 from database import MySQLConnector
-      
+
+host="194.163.128.158"
+user="amfi_user"
+database="amfi_data"
+password="BxH#X=eG[6r4s37h"
+port="3066"
         
 def load_data(data):
     """Save data into database
@@ -17,17 +22,19 @@ def load_data(data):
     df = pd.DataFrame(table_data)
     df.columns = ['sr', 'arn', 'holder_name', 'address', 'pin','email', 'city', 'telephone_r', 'telephone_o','arn_valid_till', 'arn_valid_from', 'kyd_compliant', 'EUIN']
     df.drop('sr', axis=1, inplace=True)
-    df['IngestionTimeStamp'] = datetime.now()
+    df['IngestionTimeStamp'] = str(datetime.now())
+    df['arn_valid_from'] = pd.to_datetime(df["arn_valid_from"])
+    df['arn_valid_till'] = pd.to_datetime(df["arn_valid_till"])
     if len(df) != 0:
 
         connector = MySQLConnector(
-            host=os.environ.get('host'), 
-            database=os.environ.get('database'),
-            user=os.environ.get('user'),
-            password=os.environ.get('password')
+            host=host, 
+            database=database,
+            user=user,
+            password=password
             )
         connector.connect()
-        connector.insert_dataframe(df,'amfi')
+        connector.insert_or_update_dataframe(df,'amfi', 'arn')
         connector.disconnect()
 
 def extract_city(content):
@@ -61,7 +68,7 @@ def amfi_post_request(city_name):
         return None
     
     
-def main(main_url= "https://www.amfiindia.com/investor-corner/online-center/locate-mf-distributor.aspx"):
+def amfi_scraper_main(main_url= "https://www.amfiindia.com/investor-corner/online-center/locate-mf-distributor.aspx"):
     print("AMFI FETCHER VERSION 1.0")
     print("\n")
     
@@ -72,9 +79,3 @@ def main(main_url= "https://www.amfiindia.com/investor-corner/online-center/loca
     for city_name in extract_city(data):
         data = amfi_post_request(city_name)
         load_data(data)
-
-    print("Total Time Taken by Script: {} Seconds for: {} cities".format(int(time.time() - script_begin),city_count))
-
-
-if __name__ == "__main__":
-    main()
