@@ -102,7 +102,7 @@ def extract_data(page_content):
 def irdai_scraper_main():
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(
-            headless=False,
+            headless=True,
             args=["--start-maximized"]
         )
 
