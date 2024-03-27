@@ -120,10 +120,10 @@ def irdai_scraper_main():
                 for state_id, district_list in get_district().items():
                     for district_id in district_list:
                         print(insurance_type_id, state_id, district_id)
-                        page.select_option("#ddlInsuranceType", '2')
-                        page.select_option("#ddlInsurer", '1')
-                        page.select_option("#ddlState", '10')
-                        page.select_option("#ddlDistrict", '148')
+                        page.select_option("#ddlInsuranceType", insurance_type_id)
+                        page.select_option("#ddlInsurer", insurer_id)
+                        page.select_option("#ddlState", state_id)
+                        page.select_option("#ddlDistrict", district_id)
                         page.click('#btnLocate')
         
                             # element = page.wait_for_selector("#fgAgentLocator", state="visible")
