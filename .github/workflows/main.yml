@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-             python -m playwright install
+             playwright install
              
       - name: Install the project in editable mode
         run: python setup.py install
