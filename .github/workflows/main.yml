@@ -1,0 +1,30 @@
+# This workflow will clone a repository, create a virtual environment, install dependencies, and run a script every 15 minutes
+
+name: amfi-irdai-bot-runner
+
+on:  # Triggers the workflow
+  schedule:
+    - cron: "*/15 * * * *"  # Runs every 15 minutes
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # This workflow will run on a Ubuntu virtual machine
+
+    steps:
+      - uses: actions/checkout@v3  # Checkout the repository code
+
+      - name: Create virtual environment
+        run: python3 -m venv venv
+
+      - name: Activate virtual environment
+        run: source venv/bin/activate  # For Linux/macOS
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+             python -m playwright install
+             
+      - name: Install the project in editable mode
+        run: python setup.py install
+
+      - name: Run the script
+        run: amfi_irdai_bot_runner
