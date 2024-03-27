@@ -24,8 +24,8 @@ jobs:
         run: pip install -r requirements.txt
              pip install playwright
 
-      - name: Install the project in editable mode (optional)
-        run: python setup.py install  # Only if needed
+      # - name: Install the project in editable mode (optional)
+      #   run: python setup.py install  # Only if needed
 
       - name: Run the script
-        run: amfi_irdai_bot_runner
+        run: python setup.py
