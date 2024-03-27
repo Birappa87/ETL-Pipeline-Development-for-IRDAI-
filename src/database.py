@@ -24,23 +24,38 @@ class MySQLConnector:
                 user=self.user,
                 password=self.password
             )
-            print("Connected to MySQL database! Data awaits its destiny.")
+            print("Connected to MySQL database Successfully...")
         except mysql.connector.Error as e:
             print(f"Error connecting to MySQL database: {e}")  # Handle setbacks with grace
 
     def insert_or_update_dataframe(self, dataframe, table_name, primary_key_column):
         try:
             cursor = self.connection.cursor()
-            dataframe.fillna('0', inplace=True)
             select_query = f"SELECT * FROM {table_name}"
             cursor.execute(select_query)
             existing_data = cursor.fetchall()
-            existing_df = pd.DataFrame(existing_data, columns=dataframe.columns)
 
+            if table_name == "amfi":
+                columns = ['arn', 'holder_name', 'address', 'city', 'IngestionTimeStamp', 'pin', 'email', 'telephone_r', 'telephone_o', 'arn_valid_till', 'arn_valid_from', 'kyd_compliant', 'EUIN']
+                existing_df = pd.DataFrame(existing_data, columns=columns)
+                existing_df['arn_valid_from'] = pd.to_datetime(
+                            existing_df["arn_valid_from"], 
+                            errors='coerce', 
+                            format='%Y-%m-%d %H:%M:%S'
+                            )
+                existing_df['arn_valid_till'] = pd.to_datetime(
+                            existing_df["arn_valid_till"], 
+                            errors='coerce', 
+                            format='%Y-%m-%d %H:%M:%S'
+                                )
+            else:
+                existing_df = pd.DataFrame(existing_data, columns=dataframe.columns)
+                
             # Subtract exact matches from the original DataFrame
             dataframe = dataframe.merge(existing_df, how='left', indicator=True).query('_merge == "left_only"').drop('_merge', axis=1)
 
             cols = tuple([col for col in dataframe.columns])
+            print("Loading Data in Database .....")
             for index, row in dataframe.iterrows():
                 values = [row[col] for col in cols]
 

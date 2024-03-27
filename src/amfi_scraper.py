@@ -18,14 +18,16 @@ def load_data(data):
         data (_type_): html content
         filename
     """
-    print("loading data")
     table_data = pd.read_html(data)[0]
     df = pd.DataFrame(table_data)
     df.columns = ['sr', 'arn', 'holder_name', 'address', 'pin','email', 'city', 'telephone_r', 'telephone_o','arn_valid_till', 'arn_valid_from', 'kyd_compliant', 'EUIN']
     df.drop('sr', axis=1, inplace=True)
-    df['IngestionTimeStamp'] = str(datetime.now())
+    df['IngestionTimeStamp'] = datetime.now()
     df['arn_valid_from'] = pd.to_datetime(df["arn_valid_from"])
     df['arn_valid_till'] = pd.to_datetime(df["arn_valid_till"])
+    df['arn'] = df["arn"].astype(str)
+    df['pin'] = df["pin"].astype(str)
+
     if len(df) != 0:
 
         connector = MySQLConnector(
