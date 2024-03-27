@@ -23,7 +23,7 @@ setup(
             'amfi_irdai_bot_runner = src.main:main',  # Adjust the module and function name accordingly
         ],
     },
-    cmdclass={
-        'install': InstallCommand,
-    }
+    # cmdclass={
+    #     'install': InstallCommand,
+    # }
 )
