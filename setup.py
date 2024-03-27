@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 from setuptools.command.install import install as _install
 
 # Custom install command to run 'playwright install'
-class InstallCommand(_install):
-    def run(self):
-        _install.run(self)
-        # Run 'playwright install' after installation
-        import subprocess
-        subprocess.run(['playwright', 'install'], check=True)
+# class InstallCommand(_install):
+#     def run(self):
+#         _install.run(self)
+#         # Run 'playwright install' after installation
+#         import subprocess
+#         subprocess.run(['playwright', 'install'], check=True)
 
 # Read requirements from requirements.txt file
 with open('requirements.txt', 'r', encoding='utf-16') as f:
