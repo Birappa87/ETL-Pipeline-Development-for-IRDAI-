@@ -3,9 +3,9 @@
 name: amfi-irdai-bot-runner
 
 on:  # Triggers the workflow
-  # schedule:
-  #   - cron: "*/3 * * * *"  # Runs every 15 minutes
-  workflow_dispatch
+  # schedule:  # Uncomment for scheduled trigger (e.g., every 15 minutes)
+  #   - cron: "*/15 * * * *"  # 
+  workflow_dispatch  # Manual trigger for now
 
 jobs:
   build:
@@ -20,12 +20,12 @@ jobs:
       - name: Activate virtual environment
         run: source venv/bin/activate  # For Linux/macOS
 
-      - name: Install dependencies
+      - name: Install dependencies (including playwright)
         run: pip install -r requirements.txt
-             playwright install
-             
-      - name: Navigate to src directory
-        run: cd src
+             pip install playwright
+
+      - name: Install the project in editable mode (optional)
+        run: python setup.py install  # Only if needed
 
       - name: Run the script
-        run: python main.py
+        run: amfi_irdai_bot_runner
