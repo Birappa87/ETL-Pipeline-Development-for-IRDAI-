@@ -18,12 +18,17 @@ python3 -m venv venv #for creating virtual environment
 # activate the virtual environment
 '''bash
 venv/Scripts/activate
+
+'''Linux
+source venv/bin/activate
+
+
 ```bash
 pip install -r requirements.txt
 
 ```bash
-python setup.py install
+pip install . --use-pep517
 
 ### 3. Run the script
 ```bash
-amfi_irdai_bot_runner
+irdai_bot_runner

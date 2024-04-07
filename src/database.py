@@ -1,87 +1,42 @@
-import pandas as pd
-import mysql.connector
-from datetime import datetime
+import logging
+import pymysql
 
-class MySQLConnector:
-    def __init__(self, host, database, user, password):
-        """
-        Initializes a passionate connection to the MySQL database, eager to bridge data and dreams!
-        """
-        self.host = host
-        self.database = database
-        self.user = user 
-        self.password = password
-        self.connection = None  # Awaiting the spark of connection
 
-    def connect(self):
-        """
-        Ignites a connection to the MySQL database, fueled by anticipation and excitement!
-        """
-        try:
-            self.connection = mysql.connector.connect(
-                host=self.host,
-                database=self.database,
-                user=self.user,
-                password=self.password
-            )
-            print("Connected to MySQL database Successfully...")
-        except mysql.connector.Error as e:
-            print(f"Error connecting to MySQL database: {e}")  # Handle setbacks with grace
+def load_dataframe_to_mysql(df, table_name, db_config):
+    """
+    Loads a pandas DataFrame into a MySQL database table, handling existing records.
 
-    def insert_or_update_dataframe(self, dataframe, table_name, primary_key_column):
-        try:
-            cursor = self.connection.cursor()
-            select_query = f"SELECT * FROM {table_name}"
-            cursor.execute(select_query)
-            existing_data = cursor.fetchall()
+    Args:
+        df (pandas.DataFrame): The DataFrame to load.
+        table_name (str): The name of the table in the MySQL database.
+        db_config (dict): A dictionary containing MySQL connection details.
+            - host (str): The hostname or IP address of the MySQL server.
+            - user (str): The username to connect to the database.
+            - password (str): The password for the user.
+            - database (str): The name of the database to connect to.
+    """
+    try:
+        connection = pymysql.connect(**db_config)
+        logging.info("Connection to Database succefull ..")
+    except pymysql.Error as err:
+        logging.err("Error connecting to MySQL database:", err)
+        return
 
-            if table_name == "amfi":
-                columns = ['arn', 'holder_name', 'address', 'city', 'IngestionTimeStamp', 'pin', 'email', 'telephone_r', 'telephone_o', 'arn_valid_till', 'arn_valid_from', 'kyd_compliant', 'EUIN']
-                existing_df = pd.DataFrame(existing_data, columns=columns)
-                existing_df['arn_valid_from'] = pd.to_datetime(
-                            existing_df["arn_valid_from"], 
-                            errors='coerce', 
-                            format='%Y-%m-%d %H:%M:%S'
-                            )
-                existing_df['arn_valid_till'] = pd.to_datetime(
-                            existing_df["arn_valid_till"], 
-                            errors='coerce', 
-                            format='%Y-%m-%d %H:%M:%S'
-                                )
-            else:
-                existing_df = pd.DataFrame(existing_data, columns=dataframe.columns)
-                
-            # Subtract exact matches from the original DataFrame
-            dataframe = dataframe.merge(existing_df, how='left', indicator=True).query('_merge == "left_only"').drop('_merge', axis=1)
+    try:
+        cursor = connection.cursor()
+        data = df.to_records(index=False).tolist()
+        
+        insert_query = f"""
+            REPLACE INTO {table_name} (absorbedagent, agentid, agentname, bntagentid, district, dpid, ingestiontimestamp, insurancetype, insurer, irdaurn, licenceno, mobile_no, phoneno, pincode, state, validfrom, validto)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
 
-            cols = tuple([col for col in dataframe.columns])
-            print("Loading Data in Database .....")
-            for index, row in dataframe.iterrows():
-                values = [row[col] for col in cols]
+        cursor.executemany(insert_query, data)
+        connection.commit()
+        logging.info(f"Successfully loaded {len(data)} rows into table '{table_name}'.")
 
-                # check if this record exists in database if exists overwrite
-                selectexpr = f"SELECT * FROM {table_name} WHERE {primary_key_column} = '{dataframe[primary_key_column].values[index]}'"
-                exists = cursor.execute(selectexpr)
-                result = cursor.fetchone()
-                if result is not None:
-                    # update the values
-                    set_clause = ", ".join([f"{col}='{row[col]}'" for col in dataframe.columns])
-                    query = f"UPDATE {table_name} SET {set_clause} WHERE {primary_key_column} = '{dataframe[primary_key_column].values[index]}'"
-                else:
-                    # Construct the insert query
-                    query = f"INSERT INTO {table_name} ({', '.join(cols)}) VALUES {tuple(values)}"
-                cursor.execute(query)
-                self.connection.commit()
-            print(f"Data loaded Successfully {table_name}")
-        except mysql.connector.Error as e:
-            print(f"Error inserting or updating data: {e}")
-
-    def disconnect(self):
-        """
-        Releases the connection with tenderness, bidding farewell until our paths cross again.
-        """
-        try:
-            self.connection.close()
-            print("MySQL connection gracefully released. Until we meet again, dear data.")
-        except mysql.connector.Error as e:
-            print(f"Error disconnecting from MySQL database: {e}")  # Handle parting pangs with composure
+    except pymysql.Error as err:
+        logging.error("Error loading data into MySQL table:", err)
+    finally:
+        cursor.close()
+        connection.close()
