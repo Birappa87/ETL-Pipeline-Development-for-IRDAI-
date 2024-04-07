@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 from src.database import load_dataframe_to_mysql
 
 log.basicConfig(
-    filename="logs/irdai_scraper.log",
+    filename="irdai_scraper.log",
     level=log.INFO,
     format="%(asctime)s %(message)s",
     datefmt="%d-%b-%Y %H:%M:%S",

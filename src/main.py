@@ -2,7 +2,7 @@ from src.irdai_scraper import irdai_scraper_main
 import logging
 
 logging.basicConfig(
-    filename="logs/irdai_scraper.log",
+    filename="irdai_scraper.log",
     level=logging.DEBUG,
     format="%(asctime)s %(message)s",
     datefmt="%d-%b-%Y %H:%M:%S"
