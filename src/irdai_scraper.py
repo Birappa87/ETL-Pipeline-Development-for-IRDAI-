@@ -8,7 +8,6 @@ from playwright.sync_api import sync_playwright
 import logging as log
 import time
 from selectolax.parser import HTMLParser
-from concurrent.futures import ThreadPoolExecutor
 
 from src.database import load_dataframe_to_mysql
 
@@ -184,6 +183,7 @@ def irdai_scraper_main():
                         extract_and_load_data(
                             insurance_type_id, insurer_id, state_id, district_id
                         )
+
                         if len(irdai_data) > 0:
                             load_data()
                             log.info(f"Loaded data for state_id {state_id} district_id {district_id}")
