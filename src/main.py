@@ -1,5 +1,6 @@
 from src.irdai_scraper import irdai_scraper_main
 import logging
+import asyncio
 
 logging.basicConfig(
     filename="irdai_scraper.log",
