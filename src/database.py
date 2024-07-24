@@ -17,26 +17,21 @@ def load_dataframe_to_mysql(df, table_name, db_config):
     """
     try:
         connection = pymysql.connect(**db_config)
-        logging.info("Connection to Database succefull ..")
     except pymysql.Error as err:
-        logging.err("Error connecting to MySQL database:", err)
-        return
+        return err
 
     try:
         cursor = connection.cursor()
         data = df.to_records(index=False).tolist()
-        
         insert_query = f"""
-            REPLACE INTO {table_name} (absorbedagent, agentid, agentname, bntagentid, district, dpid, ingestiontimestamp, insurancetype, insurer, irdaurn, licenceno, mobile_no, phoneno, pincode, state, validfrom, validto)
+            REPLACE INTO {table_name} (bntagentid, agentname, licenceno, irdaurn, agentid, insurancetype, insurer, dpid, state, district, pincode, validfrom, validto, absorbedagent, phoneno, mobile_no, ingestiontimestamp)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-
         cursor.executemany(insert_query, data)
         connection.commit()
-        logging.info(f"Successfully loaded {len(data)} rows into table '{table_name}'.")
 
     except pymysql.Error as err:
-        logging.error("Error loading data into MySQL table:", err)
+        print(f"Error in Database {err}")
     finally:
         cursor.close()
         connection.close()

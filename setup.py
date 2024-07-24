@@ -11,7 +11,7 @@ setup(
     install_requires=requirements,
     entry_points={
         'console_scripts': [
-            'irdai_bot_runner = src.main:main',
+            'irdai_bot_runner = src.irdai_scraper:main',
         ],
     }
 )
